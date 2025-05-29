@@ -333,7 +333,8 @@
     });
 
     document.getElementById("closeModal").addEventListener("click", () => {
-        popup.remove(); // Fecha o modal ao clicar no botão de fechar
+        popup.remove();
+        alertShown = false; // Fecha o modal ao clicar no botão de fechar
     });
 }
 
