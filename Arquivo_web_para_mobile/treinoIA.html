@@ -304,33 +304,37 @@
         }
 
         function showAlertPopup() {
-            const popup = document.createElement("div");
-            popup.innerHTML = `
-        <div class="modal fade" id="modalDescanso" tabindex="-1" aria-hidden="true"
-                            data-bs-backdrop="static" data-bs-keyboard="false">
-                            <div class="modal-dialog modal-dialog-centered bottom-0">
-                                <div class="modal-content text-center rounded-5"
-                                    style="background-color: #1e1656; color: #ffca3a;">
-                                    <div class="modal-header border-0">
-                                        <h5 class="modal-title w-100 fw-bold">Oops</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p></p>
-                                        <p id="timer" class="display-4  fs-6">Alerta: Corrija sua postura!</p>
-                                         <button id="okButton">OK</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-    `;
-            document.body.appendChild(popup);
 
-            document.getElementById("okButton").addEventListener("click", () => {
-                alertShown = false; // Reseta o alerta para permitir novos avisos
-                popup.remove(); // Remove o pop-up
-            });
-        }
+            
+    const popup = document.createElement("div");
+    popup.innerHTML = `
+        <div class="modal fade show" id="modalDescanso" tabindex="-1" aria-hidden="true"
+            style="display: block; background-color: rgba(0, 0, 0, 0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-center rounded-5"
+                    style="background-color: #1e1656; color: #ffca3a;">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title w-100 fw-bold">Oops</h5>
+                        <button type="button" class="btn-close" id="closeModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="timer" class="display-4 fs-6">Alerta: Corrija sua postura!</p>
+                        <button id="okButton" class="btn btn-warning">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    document.getElementById("okButton").addEventListener("click", () => {
+        popup.remove(); // Remove o pop-up
+    });
+
+    document.getElementById("closeModal").addEventListener("click", () => {
+        popup.remove(); // Fecha o modal ao clicar no botão de fechar
+    });
+}
 
 
 
