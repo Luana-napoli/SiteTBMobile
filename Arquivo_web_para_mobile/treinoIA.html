@@ -305,7 +305,7 @@
 
         function showAlertPopup() {
 
-            
+
     const popup = document.createElement("div");
     popup.innerHTML = `
         <div class="modal fade show" id="modalDescanso" tabindex="-1" aria-hidden="true"
@@ -328,7 +328,8 @@
     document.body.appendChild(popup);
 
     document.getElementById("okButton").addEventListener("click", () => {
-        popup.remove(); // Remove o pop-up
+        popup.remove();
+        alertShown = false; // Remove o pop-up
     });
 
     document.getElementById("closeModal").addEventListener("click", () => {
