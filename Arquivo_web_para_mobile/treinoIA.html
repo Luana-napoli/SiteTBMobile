@@ -60,7 +60,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-md-12 rounded-5 col-12 d-lg-none" >
+                <div class="col-lg-4 col-md-12 rounded-5 col-12 d-lg-none">
 
                     <div class="p-2 myContainerT rounded-5 text-center contExe">
                         <div class="text-center">
@@ -86,7 +86,7 @@
                     <div class="col-lg-6 col-12 align-items-center " style="margin-top: 2%;">
 
 
-                       
+
                         <div style="display: flex; justify-content: center; gap: 5px; " class="mt-3">
                             <p class="fw-bold" id="numero_series">Total de séries:</p>
                             <p class="fw-bold" id="nSeriesOk">3</p>
@@ -99,30 +99,33 @@
                         <button type="submit" class="rounded-pill text-center fs-3 mx-auto mt-2 d-block"
                             id="btnFimSerie">Finalizar série</button>
                     </div>
-                                 <button type="submit" class="rounded-pill text-center position-absolute bottom-0 start-0"
-                            id="info" onclick="mostrarDescricao();"><img src="info.png"
-                                class="img-fluid mb-3 position-absolute bottom-0 start-0" style="width: 45px;"></button>
+                    <button type="submit" class="rounded-pill text-center position-absolute bottom-0 start-0" id="info"
+                        onclick="mostrarDescricao();"><img src="info.png"
+                            class="img-fluid mb-3 position-absolute bottom-0 start-0" style="width: 45px;"></button>
                     <div class="modal fade" id="modalDescanso" tabindex="-1" aria-hidden="true"
                         data-bs-backdrop="static" data-bs-keyboard="false">
                         <div class="modal-dialog modal-dialog-centered bottom-0 ">
-                            <div class="modal-content text-center rounded-5" style="background-color: #1e1656; color: #ffca3a;">
+                            <div class="modal-content text-center rounded-5"
+                                style="background-color: #1e1656; color: #ffca3a;">
                                 <div class="modal-header border-0">
                                     <h5 class="modal-title w-100 fw-bold">Descrição</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
                                 <div class="modal-body">
                                     <p></p>
-                                    <p id="timer" class="display-4  fs-6">Deite-se de costas no chão, com os joelhos
-                                        dobrados e os pés apoiados no solo. As mãos devem ser cruzadas sobre o peito,
-                                        contraia o abdômen e eleve a parte superior do tronco (cabeça, ombros e parte
-                                        superior das costas) em direção aos joelhos. Desça lentamente o tronco, sem
-                                        encostar no chão, mantendo a contração abdominal durante todo o movimento.</p>
-      <div class="p-4 myContainerT rounded-5 text-center " style="margin-bottom: 0;">
-                            <video src="vAbs.mp4" class="img-fluid rounded" autoplay muted playsinline loop></video>
+                                    <p id="timer" class="display-4  fs-6">Sente-se na beirada de uma cadeira e apoie as
+                                        mãos ao lado do corpo, com os dedos voltados para frente. Estique as pernas à
+                                        frente e mantenha os calcanhares no chão. Depois, deslize o corpo para fora da
+                                        cadeira e flexione os cotovelos, descendo devagar até formar um ângulo de 90
+                                        graus. Em seguida, empurre o corpo para cima, estendendo os braços. Mantenha os
+                                        cotovelos próximos ao corpo e o abdômen firme, não encurvando o pescoço.</p>
+                                    <div class="p-4 myContainerT rounded-5 text-center " style="margin-bottom: 0;">
+                                        <video src="vTrips.mp4" class="img-fluid rounded" autoplay muted playsinline
+                                            loop></video>
 
-                        </div>                           
-                                
                                     </div>
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -215,66 +218,67 @@
             await predict();
             window.requestAnimationFrame(loop);
         }
+        let alertShown = false;
 
-   async function predict() {
-    const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-    const prediction = await model.predict(posenetOutput);
-    labelContainer.innerHTML = "";
+        async function predict() {
+            const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+            const prediction = await model.predict(posenetOutput);
+            labelContainer.innerHTML = "";
 
-    for (let i = 0; i < maxPredictions; i++) {
-           let className = prediction[i].className.trim().toLowerCase();
-        const probability = prediction[i].probability;
-        const percentage = Math.round(probability * 100);
+            for (let i = 0; i < maxPredictions; i++) {
+                let className = prediction[i].className.trim().toLowerCase();
+                const probability = prediction[i].probability;
+                const percentage = Math.round(probability * 100);
 
-        console.log("Classe detectada:", className); // <<< AJUDA A VER O NOME EXATO
+                console.log("Classe detectada:", className); // <<< AJUDA A VER O NOME EXATO
 
-        // ignora qualquer variação da classe "nada"
-        if (className.includes("nada")) continue;
+                // ignora qualquer variação da classe "nada"
+                if (className.includes("nada")) continue;
 
-        const progressWrapper = document.createElement("div");
-        progressWrapper.className = "mt-6 text-start";
+                const progressWrapper = document.createElement("div");
+                progressWrapper.className = "mt-6 text-start";
 
-        const label = document.createElement("div");
-        label.innerText = `${prediction[i].className} (${percentage}%)`;
-        label.className = "fw-bold mb-1";
+                const label = document.createElement("div");
+                label.innerText = `${prediction[i].className} (${percentage}%)`;
+                label.className = "fw-bold mb-1";
 
-        const progress = document.createElement("div");
-        progress.className = "progress";
-        progress.style.height = "20px";
+                const progress = document.createElement("div");
+                progress.className = "progress";
+                progress.style.height = "20px";
 
-        const progressBar = document.createElement("div");
-        progressBar.className = "progress-bar";
-        progressBar.style.width = `${percentage}%`;
-        progressBar.setAttribute("aria-valuenow", percentage);
-        progressBar.setAttribute("aria-valuemin", "0");
-        progressBar.setAttribute("aria-valuemax", "100");
-        progressBar.innerText = `${percentage}%`;
+                const progressBar = document.createElement("div");
+                progressBar.className = "progress-bar";
+                progressBar.style.width = `${percentage}%`;
+                progressBar.setAttribute("aria-valuenow", percentage);
+                progressBar.setAttribute("aria-valuemin", "0");
+                progressBar.setAttribute("aria-valuemax", "100");
+                progressBar.innerText = `${percentage}%`;
 
-      if (className.includes("certo")) {
-            progressBar.classList.add("bg-success"); 
-        } else {
-            progressBar.classList.add("bg-danger"); 
+                if (className.includes("certo")) {
+                    progressBar.classList.add("bg-success");
+                } else {
+                    progressBar.classList.add("bg-danger");
+                }
+
+                progress.appendChild(progressBar);
+                progressWrapper.appendChild(label);
+                progressWrapper.appendChild(progress);
+
+                labelContainer.appendChild(progressWrapper);
+
+                const classPrediction =
+                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                // labelContainer.childNodes[i].innerHTML = classPrediction;
+
+                if (prediction[i].className === "triceps errado" && prediction[i].probability > 0.9 && !alertShown) {
+                    alertShown = true; // Marca o alerta como mostrado
+                    playSound();
+                    showAlertPopup();
+                }
+            }
+
+            drawPose(pose);
         }
-
-        progress.appendChild(progressBar);
-        progressWrapper.appendChild(label);
-        progressWrapper.appendChild(progress);
-
-        labelContainer.appendChild(progressWrapper);
-
-        const classPrediction =
-            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
-
-        if (prediction[i].className === "triceps errado" && prediction[i].probability > 0.9 && !alertShown) {
-            alertShown = true; // Marca o alerta como mostrado
-            playSound();
-            showAlertPopup();
-        }
-    }
-
-    drawPose(pose);
-}
 
         function drawPose(pose) {
             if (webcam.canvas) {
@@ -288,33 +292,33 @@
             }
         }
 
-  function mostrarDescricao() {
-                        var myModal = new bootstrap.Modal(document.getElementById('modalDescanso'));
-                        myModal.show();
-                    }
+        function mostrarDescricao() {
+            var myModal = new bootstrap.Modal(document.getElementById('modalDescanso'));
+            myModal.show();
+        }
 
-                    
-    function playSound(){
-        const audio = new Audio('alerta.mp3');
-        audio.play();
-    }
 
-    function showAlertPopup() {
-    const popup = document.createElement("div");
-    popup.innerHTML = `
+        function playSound() {
+            const audio = new Audio('alerta.mp3');
+            audio.play();
+        }
+
+        function showAlertPopup() {
+            const popup = document.createElement("div");
+            popup.innerHTML = `
         <div style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
                     background:#fff; padding:20px; border-radius:10px; box-shadow:0px 0px 10px rgba(0,0,0,0.2);">
             <p>Alerta: Corrija sua postura!</p>
             <button id="okButton">OK</button>
         </div>
     `;
-    document.body.appendChild(popup);
-    
-    document.getElementById("okButton").addEventListener("click", () => {
-        alertShown = false; // Reseta o alerta para permitir novos avisos
-        popup.remove(); // Remove o pop-up
-    });
-}
+            document.body.appendChild(popup);
+
+            document.getElementById("okButton").addEventListener("click", () => {
+                alertShown = false; // Reseta o alerta para permitir novos avisos
+                popup.remove(); // Remove o pop-up
+            });
+        }
 
 
 
