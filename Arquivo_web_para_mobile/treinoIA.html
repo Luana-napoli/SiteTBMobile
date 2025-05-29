@@ -306,11 +306,23 @@
         function showAlertPopup() {
             const popup = document.createElement("div");
             popup.innerHTML = `
-        <div style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
-                    background:#fff; padding:20px; border-radius:10px; box-shadow:0px 0px 10px rgba(0,0,0,0.2);">
-            <p>Alerta: Corrija sua postura!</p>
-            <button id="okButton">OK</button>
-        </div>
+        <div class="modal fade" id="modalDescanso" tabindex="-1" aria-hidden="true"
+                            data-bs-backdrop="static" data-bs-keyboard="false">
+                            <div class="modal-dialog modal-dialog-centered bottom-0">
+                                <div class="modal-content text-center rounded-5"
+                                    style="background-color: #1e1656; color: #ffca3a;">
+                                    <div class="modal-header border-0">
+                                        <h5 class="modal-title w-100 fw-bold">Oops</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p></p>
+                                        <p id="timer" class="display-4  fs-6">Alerta: Corrija sua postura!</p>
+                                         <button id="okButton">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
     `;
             document.body.appendChild(popup);
 
