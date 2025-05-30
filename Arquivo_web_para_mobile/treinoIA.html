@@ -113,7 +113,11 @@
                                 </div>
                                 <div class="modal-body">
                                     <p></p>
-                                    <p id="timer" class="display-4  fs-6">Deite-se de costas no chão, com os joelhos dobrados e os pés apoiados no solo. As mãos devem ser cruzadas sobre o peito, contraia o abdômen e eleve a parte superior do tronco (cabeça, ombros e parte superior das costas) em direção aos joelhos. Desça lentamente o tronco, sem encostar no chão, mantendo a contração abdominal durante todo o movimento.</p>
+                                    <p id="timer" class="display-4  fs-6">Deite-se de costas no chão, com os joelhos
+                                        dobrados e os pés apoiados no solo. As mãos devem ser cruzadas sobre o peito,
+                                        contraia o abdômen e eleve a parte superior do tronco (cabeça, ombros e parte
+                                        superior das costas) em direção aos joelhos. Desça lentamente o tronco, sem
+                                        encostar no chão, mantendo a contração abdominal durante todo o movimento.</p>
                                     <div class="p-4 myContainerT rounded-5 text-center " style="margin-bottom: 0;">
                                         <video src="vTrips.mp4" class="img-fluid rounded" autoplay muted playsinline
                                             loop></video>
@@ -265,48 +269,11 @@
                     prediction[i].className + ": " + prediction[i].probability.toFixed(2);
                 // labelContainer.childNodes[i].innerHTML = classPrediction;
 
-                let erroInicio = null; // Armazena o tempo de início da detecção de erro
-const tempoTolerancia = 5000; // 5 segundos de tolerância
-
-async function predict() {
-    const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-    const prediction = await model.predict(posenetOutput);
-    labelContainer.innerHTML = "";
-
-    let posturaErradaDetectada = false;
-
-    for (let i = 0; i < maxPredictions; i++) {
-        let className = prediction[i].className.trim().toLowerCase();
-        const probability = prediction[i].probability;
-        const percentage = Math.round(probability * 100);
-
-        if (className.includes("certo")) {
-            progressBar.classList.add("bg-success");
-        } else {
-            progressBar.classList.add("bg-danger");
-        }
-
-        if (className === "errado abdominal" && probability > 0.9) {
-            posturaErradaDetectada = true;
-        }
-    }
-
-    if (posturaErradaDetectada) {
-        if (erroInicio === null) {
-            erroInicio = Date.now(); // Inicia a contagem de tempo
-        } else if (Date.now() - erroInicio >= tempoTolerancia) {
-            if (!alertShown) {
-                alertShown = true;
-                playSound();
-                showAlertPopup();
-            }
-        }
-    } else {
-        erroInicio = null; // Reseta a contagem se a postura errada não for mantida
-    }
-
-    drawPose(pose);
-}
+                if (prediction[i].className === "errado abdominal" && prediction[i].probability > 0.9 && !alertShown) {
+                    alertShown = true; // Marca o alerta como mostrado
+                    playSound();
+                    showAlertPopup();
+                }
             }
 
             drawPose(pose);
@@ -338,8 +305,8 @@ async function predict() {
         function showAlertPopup() {
 
 
-    const popup = document.createElement("div");
-    popup.innerHTML = `
+            const popup = document.createElement("div");
+            popup.innerHTML = `
         <div class="modal fade show" id="modalDescanso" tabindex="-1" aria-hidden="true"
             style="display: block; background-color: rgba(0, 0, 0, 0.5);">
             <div class="modal-dialog modal-dialog-centered">
@@ -357,18 +324,18 @@ async function predict() {
             </div>
         </div>
     `;
-    document.body.appendChild(popup);
+            document.body.appendChild(popup);
 
-    document.getElementById("okButton").addEventListener("click", () => {
-        popup.remove();
-        alertShown = false; // Remove o pop-up
-    });
+            document.getElementById("okButton").addEventListener("click", () => {
+                popup.remove();
+                alertShown = false; // Remove o pop-up
+            });
 
-    document.getElementById("closeModal").addEventListener("click", () => {
-        popup.remove();
-        alertShown = false; // Fecha o modal ao clicar no botão de fechar
-    });
-}
+            document.getElementById("closeModal").addEventListener("click", () => {
+                popup.remove();
+                alertShown = false; // Fecha o modal ao clicar no botão de fechar
+            });
+        }
 
 
 
