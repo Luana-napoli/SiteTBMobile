@@ -218,77 +218,81 @@
             await predict();
             window.requestAnimationFrame(loop);
         }
-       let erroInicio = null; // Variável para armazenar o tempo de início do erro
-const tempoTolerancia = 3000; // 3 segundos de tolerância
-let alertShown = false; // Flag para evitar alertas repetitivos
+        let erroInicio = null; // Variável para armazenar o tempo de início do erro
+        const tempoTolerancia = 3000; // 3 segundos de tolerância
+        let alertShown = false; // Flag para evitar alertas repetitivos
 
-async function predict() {
-    const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-    const prediction = await model.predict(posenetOutput);
-    labelContainer.innerHTML = "";
+        async function predict() {
+            const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+            const prediction = await model.predict(posenetOutput);
+            labelContainer.innerHTML = "";
 
-    let posturaErradaDetectada = false;
+            let posturaErradaDetectada = false;
 
-    for (let i = 0; i < maxPredictions; i++) {
-        let className = prediction[i].className.trim().toLowerCase();
-        const probability = prediction[i].probability;
-        const percentage = Math.round(probability * 100);
+            for (let i = 0; i < maxPredictions; i++) {
+                let className = prediction[i].className.trim().toLowerCase();
+                const probability = prediction[i].probability;
+                const percentage = Math.round(probability * 100);
 
-        console.log("Classe detectada:", className); // Log para depuração
+                console.log("Classe detectada:", className); // Log para depuração
 
-        // Ignora qualquer variação da classe "nada"
-        if (className.includes("nada")) continue;
+                // Ignora qualquer variação da classe "nada"
+                if (className.includes("nada")) continue;
 
-        const progressWrapper = document.createElement("div");
-        progressWrapper.className = "mt-6 text-start";
+                const progressWrapper = document.createElement("div");
+                progressWrapper.className = "mt-6 text-start";
 
-        const label = document.createElement("div");
-        label.innerText = `${prediction[i].className} (${percentage}%)`;
-        label.className = "fw-bold mb-1";
+                const label = document.createElement("div");
+                label.innerText = `${prediction[i].className} (${percentage}%)`;
+                label.className = "fw-bold mb-1";
 
-        const progress = document.createElement("div");
-        progress.className = "progress";
-        progress.style.height = "20px";
+                const progress = document.createElement("div");
+                progress.className = "progress";
+                progress.style.height = "20px";
 
-        const progressBar = document.createElement("div");
-        progressBar.className = "progress-bar";
-        progressBar.style.width = `${percentage}%`;
-        progressBar.setAttribute("aria-valuenow", percentage);
-        progressBar.setAttribute("aria-valuemin", "0");
-        progressBar.setAttribute("aria-valuemax", "100");
-        progressBar.innerText = `${percentage}%`;
+                const progressBar = document.createElement("div");
+                progressBar.className = "progress-bar";
+                progressBar.style.width = `${percentage}%`;
+                progressBar.setAttribute("aria-valuenow", percentage);
+                progressBar.setAttribute("aria-valuemin", "0");
+                progressBar.setAttribute("aria-valuemax", "100");
+                progressBar.innerText = `${percentage}%`;
 
-        // Define cor conforme a postura detectada
-        if (className.includes("certo")) {
-            progressBar.classList.add("bg-success");
-        } else {
-            progressBar.classList.add("bg-danger");
-            posturaErradaDetectada = true;
+                // Define cor conforme a postura detectada
+                if (className.includes("certo")) {
+                    progressBar.classList.add("bg-success");
+                } else {
+                    progressBar.classList.add("bg-danger");
+                }
+
+                progress.appendChild(progressBar);
+                progressWrapper.appendChild(label);
+                progressWrapper.appendChild(progress);
+
+                labelContainer.appendChild(progressWrapper);
+
+                // Verifica se "triceps errado" foi detectado e se a probabilidade é alta
+                if (className === "triceps errado" && probability > 0.9) {
+                    posturaErradaDetectada = true;
+                }
+            }
+
+            // Lógica para exibir alerta apenas se "triceps errado" for mantido por 3 segundos
+            if (posturaErradaDetectada) {
+                if (erroInicio === null) {
+                    erroInicio = Date.now(); // Inicia a contagem de tempo
+                } else if (Date.now() - erroInicio >= tempoTolerancia && !alertShown) {
+                    alertShown = true;
+                    playSound();
+                    showAlertPopup();
+                }
+            } else {
+                erroInicio = null; // Reseta a contagem se a postura errada não for mantida
+                alertShown = false; // Permite novos alertas caso necessário
+            }
+
+            drawPose(pose);
         }
-
-        progress.appendChild(progressBar);
-        progressWrapper.appendChild(label);
-        progressWrapper.appendChild(progress);
-
-        labelContainer.appendChild(progressWrapper);
-    }
-
-    // Lógica para exibir alerta apenas se a postura errada for mantida por 3 segundos
-    if (posturaErradaDetectada) {
-        if (erroInicio === null) {
-            erroInicio = Date.now(); // Inicia a contagem de tempo
-        } else if (Date.now() - erroInicio >= tempoTolerancia && !alertShown) {
-            alertShown = true;
-            playSound();
-            showAlertPopup();
-        }
-    } else {
-        erroInicio = null; // Reseta a contagem se a postura errada não for mantida
-        alertShown = false; // Permite novos alertas caso necessário
-    }
-
-    drawPose(pose);
-}
 
         function drawPose(pose) {
             if (webcam.canvas) {
@@ -316,8 +320,8 @@ async function predict() {
         function showAlertPopup() {
 
 
-    const popup = document.createElement("div");
-    popup.innerHTML = `
+            const popup = document.createElement("div");
+            popup.innerHTML = `
         <div class="modal fade show" id="modalDescanso" tabindex="-1" aria-hidden="true"
             style="display: block; background-color: rgba(0, 0, 0, 0.5);">
             <div class="modal-dialog modal-dialog-centered">
@@ -335,19 +339,19 @@ async function predict() {
             </div>
         </div>
     `;
-    document.body.appendChild(popup);
+            document.body.appendChild(popup);
 
-    document.getElementById("okButton").addEventListener("click", () => {
-        popup.remove();
-        alertShown = false; // Remove o pop-up
-    });
+            document.getElementById("okButton").addEventListener("click", () => {
+                popup.remove();
+                alertShown = false; // Remove o pop-up
+            });
 
-    document.getElementById("closeModal").addEventListener("click", () => {
-        popup.remove(); // Fecha o modal ao clicar no botão de fechar
-        popup.remove();
-        alertShown = false; // Fecha o modal ao clicar no botão de fechar
-    });
-}
+            document.getElementById("closeModal").addEventListener("click", () => {
+                popup.remove(); // Fecha o modal ao clicar no botão de fechar
+                popup.remove();
+                alertShown = false; // Fecha o modal ao clicar no botão de fechar
+            });
+        }
 
 
 
