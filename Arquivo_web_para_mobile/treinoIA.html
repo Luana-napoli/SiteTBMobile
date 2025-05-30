@@ -218,67 +218,77 @@
             await predict();
             window.requestAnimationFrame(loop);
         }
-        let alertShown = false;
+       let erroInicio = null; // Variável para armazenar o tempo de início do erro
+const tempoTolerancia = 3000; // 3 segundos de tolerância
+let alertShown = false; // Flag para evitar alertas repetitivos
 
-        async function predict() {
-            const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-            const prediction = await model.predict(posenetOutput);
-            labelContainer.innerHTML = "";
+async function predict() {
+    const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+    const prediction = await model.predict(posenetOutput);
+    labelContainer.innerHTML = "";
 
-            for (let i = 0; i < maxPredictions; i++) {
-                let className = prediction[i].className.trim().toLowerCase();
-                const probability = prediction[i].probability;
-                const percentage = Math.round(probability * 100);
+    let posturaErradaDetectada = false;
 
-                console.log("Classe detectada:", className); // <<< AJUDA A VER O NOME EXATO
+    for (let i = 0; i < maxPredictions; i++) {
+        let className = prediction[i].className.trim().toLowerCase();
+        const probability = prediction[i].probability;
+        const percentage = Math.round(probability * 100);
 
-                // ignora qualquer variação da classe "nada"
-                if (className.includes("nada")) continue;
+        console.log("Classe detectada:", className); // Log para depuração
 
-                const progressWrapper = document.createElement("div");
-                progressWrapper.className = "mt-6 text-start";
+        // Ignora qualquer variação da classe "nada"
+        if (className.includes("nada")) continue;
 
-                const label = document.createElement("div");
-                label.innerText = `${prediction[i].className} (${percentage}%)`;
-                label.className = "fw-bold mb-1";
+        const progressWrapper = document.createElement("div");
+        progressWrapper.className = "mt-6 text-start";
 
-                const progress = document.createElement("div");
-                progress.className = "progress";
-                progress.style.height = "20px";
+        const label = document.createElement("div");
+        label.innerText = `${prediction[i].className} (${percentage}%)`;
+        label.className = "fw-bold mb-1";
 
-                const progressBar = document.createElement("div");
-                progressBar.className = "progress-bar";
-                progressBar.style.width = `${percentage}%`;
-                progressBar.setAttribute("aria-valuenow", percentage);
-                progressBar.setAttribute("aria-valuemin", "0");
-                progressBar.setAttribute("aria-valuemax", "100");
-                progressBar.innerText = `${percentage}%`;
+        const progress = document.createElement("div");
+        progress.className = "progress";
+        progress.style.height = "20px";
 
-                if (className.includes("certo")) {
-                    progressBar.classList.add("bg-success");
-                } else {
-                    progressBar.classList.add("bg-danger");
-                }
+        const progressBar = document.createElement("div");
+        progressBar.className = "progress-bar";
+        progressBar.style.width = `${percentage}%`;
+        progressBar.setAttribute("aria-valuenow", percentage);
+        progressBar.setAttribute("aria-valuemin", "0");
+        progressBar.setAttribute("aria-valuemax", "100");
+        progressBar.innerText = `${percentage}%`;
 
-                progress.appendChild(progressBar);
-                progressWrapper.appendChild(label);
-                progressWrapper.appendChild(progress);
-
-                labelContainer.appendChild(progressWrapper);
-
-                const classPrediction =
-                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-                // labelContainer.childNodes[i].innerHTML = classPrediction;
-
-                if (prediction[i].className === "triceps errado" && prediction[i].probability > 0.9 && !alertShown) {
-                    alertShown = true; // Marca o alerta como mostrado
-                    playSound();
-                    showAlertPopup();
-                }
-            }
-
-            drawPose(pose);
+        // Define cor conforme a postura detectada
+        if (className.includes("certo")) {
+            progressBar.classList.add("bg-success");
+        } else {
+            progressBar.classList.add("bg-danger");
+            posturaErradaDetectada = true;
         }
+
+        progress.appendChild(progressBar);
+        progressWrapper.appendChild(label);
+        progressWrapper.appendChild(progress);
+
+        labelContainer.appendChild(progressWrapper);
+    }
+
+    // Lógica para exibir alerta apenas se a postura errada for mantida por 3 segundos
+    if (posturaErradaDetectada) {
+        if (erroInicio === null) {
+            erroInicio = Date.now(); // Inicia a contagem de tempo
+        } else if (Date.now() - erroInicio >= tempoTolerancia && !alertShown) {
+            alertShown = true;
+            playSound();
+            showAlertPopup();
+        }
+    } else {
+        erroInicio = null; // Reseta a contagem se a postura errada não for mantida
+        alertShown = false; // Permite novos alertas caso necessário
+    }
+
+    drawPose(pose);
+}
 
         function drawPose(pose) {
             if (webcam.canvas) {
