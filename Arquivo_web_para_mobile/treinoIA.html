@@ -291,9 +291,6 @@ async function predict() {
             progressBar.classList.add("bg-danger");
         }
 
-        if (className === "Errado abdominal" && probability > 0.9) {
-            posturaErradaDetectada = true;
-        }
     }
 
     if (posturaErradaDetectada) {
