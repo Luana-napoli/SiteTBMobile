@@ -265,11 +265,48 @@
                     prediction[i].className + ": " + prediction[i].probability.toFixed(2);
                 // labelContainer.childNodes[i].innerHTML = classPrediction;
 
-                if (prediction[i].className === "Errado abdominal" && prediction[i].probability > 0.9 && !alertShown) {
-                    alertShown = true; // Marca o alerta como mostrado
-                    playSound();
-                    showAlertPopup();
-                }
+                let erroInicio = null; // Armazena o tempo de início da detecção de erro
+const tempoTolerancia = 5000; // 5 segundos de tolerância
+
+async function predict() {
+    const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+    const prediction = await model.predict(posenetOutput);
+    labelContainer.innerHTML = "";
+
+    let posturaErradaDetectada = false;
+
+    for (let i = 0; i < maxPredictions; i++) {
+        let className = prediction[i].className.trim().toLowerCase();
+        const probability = prediction[i].probability;
+        const percentage = Math.round(probability * 100);
+
+        if (className.includes("certo")) {
+            progressBar.classList.add("bg-success");
+        } else {
+            progressBar.classList.add("bg-danger");
+        }
+
+        if (className === "errado abdominal" && probability > 0.9) {
+            posturaErradaDetectada = true;
+        }
+    }
+
+    if (posturaErradaDetectada) {
+        if (erroInicio === null) {
+            erroInicio = Date.now(); // Inicia a contagem de tempo
+        } else if (Date.now() - erroInicio >= tempoTolerancia) {
+            if (!alertShown) {
+                alertShown = true;
+                playSound();
+                showAlertPopup();
+            }
+        }
+    } else {
+        erroInicio = null; // Reseta a contagem se a postura errada não for mantida
+    }
+
+    drawPose(pose);
+}
             }
 
             drawPose(pose);
