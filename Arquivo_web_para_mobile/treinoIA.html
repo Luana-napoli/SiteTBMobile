@@ -113,11 +113,12 @@
                                 </div>
                                 <div class="modal-body">
                                     <p></p>
-                                    <p id="timer" class="display-4  fs-6">Deite-se de costas no chão, com os joelhos
-                                        dobrados e os pés apoiados no solo. As mãos devem ser cruzadas sobre o peito,
-                                        contraia o abdômen e eleve a parte superior do tronco (cabeça, ombros e parte
-                                        superior das costas) em direção aos joelhos. Desça lentamente o tronco, sem
-                                        encostar no chão, mantendo a contração abdominal durante todo o movimento.</p>
+                                    <p id="timer" class="display-4  fs-6">Sente-se na beirada de uma cadeira e apoie as
+                                        mãos ao lado do corpo, com os dedos voltados para frente. Estique as pernas à
+                                        frente e mantenha os calcanhares no chão. Depois, deslize o corpo para fora da
+                                        cadeira e flexione os cotovelos, descendo devagar até formar um ângulo de 90
+                                        graus. Em seguida, empurre o corpo para cima, estendendo os braços. Mantenha os
+                                        cotovelos próximos ao corpo e o abdômen firme, não encurvando o pescoço.</p>
                                     <div class="p-4 myContainerT rounded-5 text-center " style="margin-bottom: 0;">
                                         <video src="vTrips.mp4" class="img-fluid rounded" autoplay muted playsinline
                                             loop></video>
@@ -141,7 +142,7 @@
         // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/pose
 
         // the link to your model provided by Teachable Machine export panel
-        const URL = "https://teachablemachine.withgoogle.com/models/3Zk61GAqV/";
+        const URL = "https://teachablemachine.withgoogle.com/models/I93YxZeUt/";
         let model, webcam, ctx, labelContainer, maxPredictions;
 
         async function init() {
@@ -217,26 +218,21 @@
             await predict();
             window.requestAnimationFrame(loop);
         }
-
-        let erroInicio = null; // Variável para armazenar o tempo de início do erro
-        const tempoTolerancia = 5000; // 5 segundos de tolerância
-        let alertShown = false; // Flag para evitar alertas repetitivos
+        let alertShown = false;
 
         async function predict() {
             const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
             const prediction = await model.predict(posenetOutput);
             labelContainer.innerHTML = "";
 
-            let posturaErradaDetectada = false;
-
             for (let i = 0; i < maxPredictions; i++) {
                 let className = prediction[i].className.trim().toLowerCase();
                 const probability = prediction[i].probability;
                 const percentage = Math.round(probability * 100);
 
-                console.log("Classe detectada:", className); // Log para depuração
+                console.log("Classe detectada:", className); // <<< AJUDA A VER O NOME EXATO
 
-                // Ignora qualquer variação da classe "nada"
+                // ignora qualquer variação da classe "nada"
                 if (className.includes("nada")) continue;
 
                 const progressWrapper = document.createElement("div");
@@ -258,12 +254,10 @@
                 progressBar.setAttribute("aria-valuemax", "100");
                 progressBar.innerText = `${percentage}%`;
 
-                // Define cor conforme a postura detectada
                 if (className.includes("certo")) {
                     progressBar.classList.add("bg-success");
                 } else {
                     progressBar.classList.add("bg-danger");
-                    posturaErradaDetectada = true;
                 }
 
                 progress.appendChild(progressBar);
@@ -272,24 +266,15 @@
 
                 labelContainer.appendChild(progressWrapper);
 
-                // Verifica se a postura errada foi detectada e se a probabilidade é alta
-                if (className === "errado abdominal" && probability > 0.9) {
-                    posturaErradaDetectada = true;
-                }
-            }
+                const classPrediction =
+                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                // labelContainer.childNodes[i].innerHTML = classPrediction;
 
-            // Lógica para exibir alerta caso postura errada seja mantida por tempo suficiente
-            if (posturaErradaDetectada) {
-                if (erroInicio === null) {
-                    erroInicio = Date.now(); // Inicia a contagem de tempo
-                } else if (Date.now() - erroInicio >= tempoTolerancia && !alertShown) {
-                    alertShown = true;
+                if (prediction[i].className === "triceps errado" && prediction[i].probability > 0.9 && !alertShown) {
+                    alertShown = true; // Marca o alerta como mostrado
                     playSound();
                     showAlertPopup();
                 }
-            } else {
-                erroInicio = null; // Reseta a contagem se a postura errada não for mantida
-                alertShown = false; // Permite novos alertas caso necessário
             }
 
             drawPose(pose);
@@ -321,8 +306,8 @@
         function showAlertPopup() {
 
 
-            const popup = document.createElement("div");
-            popup.innerHTML = `
+    const popup = document.createElement("div");
+    popup.innerHTML = `
         <div class="modal fade show" id="modalDescanso" tabindex="-1" aria-hidden="true"
             style="display: block; background-color: rgba(0, 0, 0, 0.5);">
             <div class="modal-dialog modal-dialog-centered">
@@ -340,18 +325,19 @@
             </div>
         </div>
     `;
-            document.body.appendChild(popup);
+    document.body.appendChild(popup);
 
-            document.getElementById("okButton").addEventListener("click", () => {
-                popup.remove();
-                alertShown = false; // Remove o pop-up
-            });
+    document.getElementById("okButton").addEventListener("click", () => {
+        popup.remove();
+        alertShown = false; // Remove o pop-up
+    });
 
-            document.getElementById("closeModal").addEventListener("click", () => {
-                popup.remove();
-                alertShown = false; // Fecha o modal ao clicar no botão de fechar
-            });
-        }
+    document.getElementById("closeModal").addEventListener("click", () => {
+        popup.remove(); // Fecha o modal ao clicar no botão de fechar
+        popup.remove();
+        alertShown = false; // Fecha o modal ao clicar no botão de fechar
+    });
+}
 
 
 
@@ -361,5 +347,3 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 </body>
-
-</html>
