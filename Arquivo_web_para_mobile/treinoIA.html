@@ -270,13 +270,13 @@
 
                 labelContainer.appendChild(progressWrapper);
 
-                // Verifica se "triceps errado" foi detectado e se a probabilidade é alta
-                if (className === "Errado abdominal" && probability > 0.9) {
+                // Verifica se "Errado abdominal" foi detectado e se a probabilidade é alta
+                if (className === "errado abdominal" && probability > 0.9) {
                     posturaErradaDetectada = true;
                 }
             }
 
-            // Lógica para exibir alerta apenas se "triceps errado" for mantido por 3 segundos
+            // Lógica para exibir alerta apenas se "Errado abdominal" for mantido por 3 segundos
             if (posturaErradaDetectada) {
                 if (erroInicio === null) {
                     erroInicio = Date.now(); // Inicia a contagem de tempo
@@ -286,12 +286,13 @@
                     showAlertPopup();
                 }
             } else {
-                erroInicio = null; // Reseta a contagem se a postura errada não for mantida
+                erroInicio = null; // Reseta a contagem se "Errado abdominal" não for mantido
                 alertShown = false; // Permite novos alertas caso necessário
             }
 
             drawPose(pose);
         }
+
 
         function drawPose(pose) {
             if (webcam.canvas) {
