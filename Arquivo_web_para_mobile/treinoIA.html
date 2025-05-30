@@ -265,7 +265,7 @@
                     prediction[i].className + ": " + prediction[i].probability.toFixed(2);
                 // labelContainer.childNodes[i].innerHTML = classPrediction;
 
-                if (prediction[i].className === "triceps errado" && prediction[i].probability > 0.9 && !alertShown) {
+                if (prediction[i].className === "Errado abdominal" && prediction[i].probability > 0.9 && !alertShown) {
                     alertShown = true; // Marca o alerta como mostrado
                     playSound();
                     showAlertPopup();
