@@ -217,6 +217,12 @@
             await predict();
             window.requestAnimationFrame(loop);
         }
+        let erroInicio = null; // Variável para armazenar o tempo de início do erro
+        const tempoTolerancia = 3000; // 3 segundos de tolerância
+        let alertShown = false; // Flag para evitar alertas repetitivos
+
+
+        let soundInterval;
 
         async function predict() {
             const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
@@ -268,13 +274,23 @@
 
                 // Verifica se "Errado abdominal" foi detectado e se a probabilidade é alta
                 if (className === "errado abdominal" && probability > 0.9) {
-                      setTimeout(playSound,5000);
+                    erradoDetectado = true;
+                }
+            }
+
+            if (erradoDetectado) {
+                if (!soundInterval) {
+                    soundInterval = setInterval(playSound, 5000);
+                }
+            } else {
+                if (soundInterval) {
+                    clearInterval(soundInterval);
+                    soundInterval = null;
                 }
             }
 
             drawPose(pose);
         }
-
 
         function drawPose(pose) {
             if (webcam.canvas) {
@@ -297,6 +313,7 @@
         function playSound() {
             const audio = new Audio('alerta.mp3');
             audio.play();
+            setTimeout(5000);
         }
 
 
