@@ -151,7 +151,7 @@
         maxPredictions = model.getTotalClasses();
 
         // Configuração rápida da câmera com resolução reduzida para melhorar inicialização
-        webcam = new tmPose.Webcam(640, 480, true); // Reduzindo resolução para um carregamento mais rápido
+        webcam = new tmPose.Webcam(640, 640, true); // Reduzindo resolução para um carregamento mais rápido
         await webcam.setup();
         await webcam.play();
         window.requestAnimationFrame(loop);
@@ -159,7 +159,7 @@
         // Capturando elementos DOM apenas uma vez
         const canvas = document.getElementById("canvasSmall");
         canvas.width = 640; 
-        canvas.height = 480;
+        canvas.height = 640;
         labelContainer = document.getElementById("label-containerSmall");
 
         labelContainer.innerHTML = "";
