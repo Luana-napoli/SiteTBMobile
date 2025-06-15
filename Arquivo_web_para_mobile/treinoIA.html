@@ -50,7 +50,7 @@
 
                 <div id="titleT" class="text-center">
                     <br><br>
-                    <h1 class="fw-bold fs-1 text-uppercase" id="nomeEx">nome exercicio</h1>
+                    <h1 class="fw-bold fs-1 text-uppercase" id="nomeEx">Triceps na Cadeira</h1>
                     <div class="d-lg-none  text-uppercase" style="padding-top:1% ;">
 
                         <div style="display: flex; justify-content: center; gap: 5px; ">
@@ -113,13 +113,11 @@
                                 </div>
                                 <div class="modal-body">
                                     <p></p>
-                                    <p id="timer" class="display-4  fs-6">Deite-se de costas no chão, com os joelhos
-                                        dobrados e os pés apoiados no solo. As mãos devem ser cruzadas sobre o peito,
-                                        contraia o abdômen e eleve a parte superior do tronco (cabeça, ombros e parte
-                                        superior das costas) em direção aos joelhos. Desça lentamente o tronco, sem
-                                        encostar no chão, mantendo a contração abdominal durante todo o movimento.</p>
+                                    <p id="timer" class="display-4  fs-6">pegar uma cadeira ou banco, sentar no banco e
+                                        colocar as palmas das mãos no assento, próximas às coxas. Manter os braços no
+                                        assento e mover o corpo à frente, com as pernas esticadas.</p>
                                     <div class="p-4 myContainerT rounded-5 text-center " style="margin-bottom: 0;">
-                                        <video src="vAbs.mp4" class="img-fluid rounded" autoplay muted playsinline
+                                        <video src="vTrips.mp4" class="img-fluid rounded" autoplay muted playsinline
                                             loop></video>
 
                                     </div>
@@ -141,7 +139,7 @@
         // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/pose
 
         // the link to your model provided by Teachable Machine export panel
-        const URL = "https://teachablemachine.withgoogle.com/models/3Zk61GAqV/";
+        const URL = "https://teachablemachine.withgoogle.com/models/181o1ndjx/";
         let model, webcam, ctx, labelContainer, maxPredictions;
 
         async function init() {
@@ -221,12 +219,14 @@
         const tempoTolerancia = 3000; // 3 segundos de tolerância
         let alertShown = false; // Flag para evitar alertas repetitivos
 
+
+        let soundInterval;
+
         async function predict() {
             const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
             const prediction = await model.predict(posenetOutput);
             labelContainer.innerHTML = "";
 
-            let posturaErradaDetectada = false;
 
             for (let i = 0; i < maxPredictions; i++) {
                 let className = prediction[i].className.trim().toLowerCase();
@@ -271,28 +271,24 @@
                 labelContainer.appendChild(progressWrapper);
 
                 // Verifica se "Errado abdominal" foi detectado e se a probabilidade é alta
-                if (className === "errado abdominal" && probability > 0.9) {
-                    posturaErradaDetectada = true;
+                if (className.includes("errado") && probability > 0.9) {
+                    erradoDetectado = true;
                 }
             }
 
-            // Lógica para exibir alerta apenas se "Errado abdominal" for mantido por 3 segundos
-            if (posturaErradaDetectada) {
-                if (erroInicio === null) {
-                    erroInicio = Date.now(); // Inicia a contagem de tempo
-                } else if (Date.now() - erroInicio >= tempoTolerancia && !alertShown) {
-                    alertShown = true;
-                    playSound();
-                    showAlertPopup();
+            if (erradoDetectado) {
+                if (!soundInterval) {
+                    soundInterval = setInterval(playSound, 5000);
                 }
             } else {
-                erroInicio = null; // Reseta a contagem se "Errado abdominal" não for mantido
-                alertShown = false; // Permite novos alertas caso necessário
+                if (soundInterval) {
+                    clearInterval(soundInterval);
+                    soundInterval = null;
+                }
             }
 
             drawPose(pose);
         }
-
 
         function drawPose(pose) {
             if (webcam.canvas) {
@@ -315,42 +311,7 @@
         function playSound() {
             const audio = new Audio('alerta.mp3');
             audio.play();
-        }
-
-        function showAlertPopup() {
-
-
-            const popup = document.createElement("div");
-            popup.innerHTML = `
-        <div class="modal fade show" id="modalDescanso" tabindex="-1" aria-hidden="true"
-            style="display: block; background-color: rgba(0, 0, 0, 0.5);">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content text-center rounded-5"
-                    style="background-color: #1e1656; color: #ffca3a;">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title w-100 fw-bold">Oops</h5>
-                        <button type="button" class="btn-close" id="closeModal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p id="timer" class="display-4 fs-6">Alerta: Corrija sua postura!</p>
-                        <button id="okButton" class="btn btn-warning">OK</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-            document.body.appendChild(popup);
-
-            document.getElementById("okButton").addEventListener("click", () => {
-                popup.remove();
-                alertShown = false; // Remove o pop-up
-            });
-
-            document.getElementById("closeModal").addEventListener("click", () => {
-                popup.remove(); // Fecha o modal ao clicar no botão de fechar
-                popup.remove();
-                alertShown = false; // Fecha o modal ao clicar no botão de fechar
-            });
+            setTimeout(5000);
         }
 
 
