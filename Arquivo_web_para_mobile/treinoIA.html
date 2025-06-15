@@ -222,6 +222,9 @@
 
         let soundInterval;
 
+
+        let soundInterval;
+
         async function predict() {
             const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
             const prediction = await model.predict(posenetOutput);
@@ -279,8 +282,15 @@
             if (erradoDetectado) {
                 if (!soundInterval) {
                     soundInterval = setInterval(playSound, 5000);
+            if (erradoDetectado) {
+                if (!soundInterval) {
+                    soundInterval = setInterval(playSound, 5000);
                 }
             } else {
+                if (soundInterval) {
+                    clearInterval(soundInterval);
+                    soundInterval = null;
+                }
                 if (soundInterval) {
                     clearInterval(soundInterval);
                     soundInterval = null;
@@ -311,6 +321,7 @@
         function playSound() {
             const audio = new Audio('alerta.mp3');
             audio.play();
+            setTimeout(5000);
             setTimeout(5000);
         }
 
