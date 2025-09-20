@@ -207,31 +207,77 @@
         const tempoTolerancia = 3000; // 3 segundos de tolerância
         let alertShown = false; // Flag para evitar alertas repetitivos
 
-        async function predict() {
-          const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-        const prediction = await model.predict(posenetOutput);
 
-        labelContainer.innerHTML = "";
+        let soundInterval;
 
-        prediction.forEach(({ className, probability }) => {
-            const percentage = Math.round(probability * 100);
-            if (!className.toLowerCase().includes("nada")) {
-                labelContainer.innerHTML += `
-                    <div class="mt-6 text-start">
-                        <div class="fw-bold mb-1">${className} (${percentage}%)</div>
-                        <div class="progress" style="height: 20px;">
-                            <div class="progress-bar ${className.includes("certo") ? "bg-success" : "bg-danger"}" 
-                                style="width: ${percentage}%;" 
-                                aria-valuenow="${percentage}" 
-                                aria-valuemin="0" 
-                                aria-valuemax="100">${percentage}%</div>
-                        </div>
-                    </div>`;
+
+      async function predict() {
+            const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+            const prediction = await model.predict(posenetOutput);
+            labelContainer.innerHTML = "";
+
+            let erroDetectado = false;
+
+            for (let i = 0; i < maxPredictions; i++) {
+                let className = prediction[i].className.trim().toLowerCase();
+                const probability = prediction[i].probability;
+
+                if (className.includes("errado") && probability > 0.9) {
+                    erroDetectado = true;
+                }
+
+                const percentage = Math.round(probability * 100);
+
+                //console.log("Classe detectada:", className); // Log para depuração
+
+                // Ignora qualquer variação da classe "nada"
+                if (className.includes("nada")) continue;
+
+                const progressWrapper = document.createElement("div");
+                progressWrapper.className = "mt-6 text-start";
+
+                const label = document.createElement("div");
+                label.innerText = `${prediction[i].className} (${percentage}%)`;
+                label.className = "fw-bold mb-1";
+
+                const progress = document.createElement("div");
+                progress.className = "progress";
+                progress.style.height = "20px";
+
+                const progressBar = document.createElement("div");
+                progressBar.className = "progress-bar";
+                progressBar.style.width = `${percentage}%`;
+                progressBar.setAttribute("aria-valuenow", percentage);
+                progressBar.setAttribute("aria-valuemin", "0");
+                progressBar.setAttribute("aria-valuemax", "100");
+                progressBar.innerText = `${percentage}%`;
+
+                // Define cor conforme a postura detectada
+                if (className.includes("certo")) {
+                    progressBar.classList.add("bg-success");
+                }
+                 else {
+                    progressBar.classList.add("bg-danger");
+                }
+
+                progress.appendChild(progressBar);
+                progressWrapper.appendChild(label);
+                progressWrapper.appendChild(progress);
+
+                labelContainer.appendChild(progressWrapper);
+             }
+
+            // Se erro detectado, toca o som
+            if (erroDetectado && !alertShown) {
+                alertShown = true; 
+                playSound();
+
+                // libera novamente depois de 3s
+                setTimeout(() => { alertShown = false; }, tempoTolerancia);
             }
-        });
 
-        drawPose(pose);
-    }
+            drawPose(pose);
+        }
 
     function drawPose(pose) {
         const ctx = document.getElementById("canvasSmall").getContext("2d");
@@ -263,5 +309,6 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 </body>
+
 
 
